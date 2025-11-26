@@ -38,20 +38,25 @@ void menu() {
             case 3: DisplayVehicles(); break;
             case 4: ParkingLotStatus(); break;
             case 5: Search(); break;
-            case 6: ExitProgram(); break;
+            case 6: 
+                printf("\nTotal Revenue Collected: %.2f Rupees Only. \n",totalRevenue);
+                printf("Thank You for using PARKING-LOT-SYSTEM!!\n");
+                return;
             default: printf("\n Invalid Choice! TRY AGAIN. \n");
         }
     }
 }
 
 
-//*creating all functions (1-6)
+//*creating all functions (1-5,collecting revenue and functions to store data and show previous data whenever we log in again.)
 void VehicleEntry();
 void VehiceExit();
 void DisplayVehicles();
 void ParkingLotStatus();
 void Search();
-void ExitProgram();
+float calculateFee(char type[], int hour);
+void saveDataToFile();
+void LoadData();
 
 //---------------------------------------VEHICLE ENTRY---------------------------------
 void VehicleEntry() {
@@ -65,6 +70,128 @@ void VehicleEntry() {
     scanf("%s",v.number);
     printf("Enter Vehicle Type(Car/Bike/Truck): ");
     scanf("%s",v.type);
-
+    //entering the time of entry (using my laptop's time.)
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    sprintf(v.entryTime, "%02d:%02d", tm->tm_hour, tm->tm_min);
     
+    vehicles[filledSlots++] = v;  //adding filledslots by one after every parking
+    printf("\nVEHICLE PARKED SUCCESSFULLY at %s\n",v.entryTime);
 }
+
+//-----------------------------------VEHICLE EXIT---------------------------------------
+void vehicleExit() {
+    char num[20];
+    printf("\nEnter Vehicle Number to Exit: ");
+    scanf("%s", num);
+
+    int found = -1;
+    for (int i = 0; i < filledSlots; i++) {
+        if (strcmp(vehicles[i].number, num) == 0) {
+            found = i;
+            break;
+        }
+    }
+
+    if (found == -1) {
+        printf("\nVehicle not found!\n");
+        return;
+    }
+    //ENTERING EXIT TIME AND AND STORING AS VARIABLE NOW.
+    time_t now = time(NULL);
+    struct tm *tm_now = localtime(&now);
+    int exitHour = tm_now->tm_hour;
+    int exitMin = tm_now->tm_min;
+
+    int entryHour, entryMin;  //ENTRY TIME
+    sscanf(vehicles[found].entryTime, "%d:%d", &entryHour, &entryMin);
+
+    int hours = exitHour - entryHour;  //CALCULATING TIME OF PARKING 
+    int minutes = exitMin - entryMin;
+
+    if (minutes < 0) {            //(BASIC BORROWING OF SUBTRACTION)
+        minutes += 60;
+        hours -= 1;
+    }
+    if (hours < 0) {
+        hours += 24; // handle overnight parking
+    }
+
+    // Convert partial hour if needed
+    float totalHours = hours + (minutes / 60.0);
+ 
+    //CALCULATING FEES 
+    float fee = calculateFee(vehicles[found].type, totalHours);
+    printf("\nVehicle Number: %s", vehicles[found].number);
+    printf("\nEntry Time: %s", vehicles[found].entryTime);
+    printf("\nExit Time: %02d:%02d", exitHour, exitMin);
+    printf("\nTotal Parked: %.2f hours", totalHours);
+    printf("\nParking Fee: %.2f Rupees\n", fee);
+
+    totalRevenue+=fee;
+
+    //removing the vehicle from record.
+    for (int i= found; i < filledSlots - 1; i++) {
+        vehicles[i] = vehicles[i+1];
+    }
+    filledSlots--;
+
+    printf("\nVehicle Exit Successful. Thank You!!\n");
+}
+
+//-------------------------------DISPLAY VEHICLES-------------------------------------------------
+void DisplayVehicles() {
+    if (filledSlots == 0) {
+        printf("\n NO VEHICLE PARKED YET!!!\n");
+        return;
+        }
+    
+    printf("\nLIST OF PARKED VEHICLES:\n");
+    printf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+    printf("NUMBER\t\tTYPE\t\tENTRY TIME\n");
+    printf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+   
+    for (int i=0; i<filledSlots; i++) {
+        printf("%s\t\t%s\t\t%s\n",vehicles[i].number,vehicles[i].type,vehicles[i].entryTime);
+    }
+
+    printf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+}
+
+//-----------------------------------PARKING LOT STATUS--------------------------------------------------
+void ParkingLotStatus() {
+    printf("\nTotal Slots: %d",totalSlots);
+    printf("\nFilled Slots: %d", filledSlots);
+    printf("\nAvailaible Slots: %d\n",totalSlots-filledSlots);
+}
+
+//----------------------------------SEARCHING VEHICLE---------------------------------------------------------
+void Search() {
+    char num[20];
+    printf("\nEnter Vehicle Number to search: ");
+    scanf("%s",num);
+     
+    for (int i = 0; i < filledSlots; i++) {
+        if (strcmp(vehicles[i].number, num) == 0) {
+            printf("\nVehicle Found!\n");
+            printf("Number: %s\nType: %s\nEntry Time: %s\n", 
+                   vehicles[i].number, vehicles[i].type, vehicles[i].entryTime);
+            return;
+        }
+    }
+    printf("\nVehicle Not Found!\n");
+}
+
+//--------------------------FEE CALCULATION----------------------------------------------------
+float calculateFee(char type[], int hours) {
+    float rate;
+    if (strcmp(type, "Car") == 0 || strcmp(type, "car") == 0)
+        rate = 20;
+    else if (strcmp(type, "Bike") == 0 || strcmp(type, "bike") == 0)
+        rate = 10;
+    else
+        rate = 30;
+    return rate * hours;
+} 
+
+//-------------------------------FILE HANDLING-----------------------------------------------------------
