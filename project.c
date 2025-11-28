@@ -18,12 +18,21 @@ int totalSlots = 50;
 int filledSlots = 0;
 float totalRevenue = 0;
 
+//*creating all functions (1-5,collecting revenue and functions to store data and show previous data whenever we log in again.)
+void VehicleEntry();
+void VehicleExit();
+void DisplayVehicles();
+void ParkingLotStatus();
+void Search();
+float calculateFee(char type[], float hour);
+void saveDataToFile();
+void LoadData();
+
 //1.  menu for user to choose the option he/she wants to access.
 void menu() {
     int choice;
     while(1) {
-        printf("\n=================WELCOME TO PARKING-LOT-MANAGEMENT SYSTEM===========================\n ");
-        printf("1. Vehicle Entry \n");
+        printf("\n1. Vehicle Entry \n");
         printf("2. Vehicle Exit \n");
         printf("3. Display Parked Vehicles status \n");
         printf("4. Parking Lot Status \n");
@@ -34,7 +43,7 @@ void menu() {
 
         switch(choice) {        //need to create functions first,
             case 1: VehicleEntry(); break;
-            case 2: VehiceExit(); break;
+            case 2: VehicleExit(); break;
             case 3: DisplayVehicles(); break;
             case 4: ParkingLotStatus(); break;
             case 5: Search(); break;
@@ -47,17 +56,6 @@ void menu() {
     }
 }
 
-
-//*creating all functions (1-5,collecting revenue and functions to store data and show previous data whenever we log in again.)
-void VehicleEntry();
-void VehiceExit();
-void DisplayVehicles();
-void ParkingLotStatus();
-void Search();
-float calculateFee(char type[], int hour);
-void saveDataToFile();
-void LoadData();
-
 //---------------------------------------VEHICLE ENTRY---------------------------------
 void VehicleEntry() {
     if (filledSlots>= totalSlots) {
@@ -66,7 +64,7 @@ void VehicleEntry() {
     }
 
     struct Vehicle v;
-    printf("\nEnter Vehichle Number: ");
+    printf("\nEnter Vehicle Number: ");
     scanf("%s",v.number);
     printf("Enter Vehicle Type(Car/Bike/Truck): ");
     scanf("%s",v.type);
@@ -80,7 +78,7 @@ void VehicleEntry() {
 }
 
 //-----------------------------------VEHICLE EXIT---------------------------------------
-void vehicleExit() {
+void VehicleExit() {
     char num[20];
     printf("\nEnter Vehicle Number to Exit: ");
     scanf("%s", num);
@@ -147,15 +145,15 @@ void DisplayVehicles() {
         }
     
     printf("\nLIST OF PARKED VEHICLES:\n");
-    printf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-    printf("NUMBER\t\tTYPE\t\tENTRY TIME\n");
-    printf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+    printf("\n|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|\n");
+    printf("  NUMBER\t\tTYPE\t\tENTRY TIME\n");
+    printf("\n|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|\n");
    
     for (int i=0; i<filledSlots; i++) {
-        printf("%s\t\t%s\t\t%s\n",vehicles[i].number,vehicles[i].type,vehicles[i].entryTime);
+        printf("  %s\t%s\t\t%s\n",vehicles[i].number,vehicles[i].type,vehicles[i].entryTime);
     }
 
-    printf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+    printf("\n|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|4\n");
 }
 
 //-----------------------------------PARKING LOT STATUS--------------------------------------------------
@@ -183,15 +181,40 @@ void Search() {
 }
 
 //--------------------------FEE CALCULATION----------------------------------------------------
-float calculateFee(char type[], int hours) {
+float calculateFee(char type[], float hours) {
     float rate;
-    if (strcmp(type, "Car") == 0 || strcmp(type, "car") == 0)
+    if (strcmp(type, "Car") == 0 || strcmp(type, "car") == 0)     //20 FOR CAR
         rate = 20;
-    else if (strcmp(type, "Bike") == 0 || strcmp(type, "bike") == 0)
+    else if (strcmp(type, "Bike") == 0 || strcmp(type, "bike") == 0)    //10 FOR BIKE
         rate = 10;
     else
-        rate = 30;
+        rate = 30;                         //30 FOR TRUCK
     return rate * hours;
 } 
 
-//-------------------------------FILE HANDLING-----------------------------------------------------------
+//-------------------------------FILE HANDLING---------------------------------------------------------------------------------------------------
+void saveDataToFile() {
+    FILE *fp = fopen("parkingdata.txt", "w");
+    for (int i = 0; i < filledSlots; i++) {
+        fprintf(fp, "%s %s %s\n", vehicles[i].number, vehicles[i].type, vehicles[i].entryTime);
+    }
+    fclose(fp);
+}
+
+//---------------------------------------------RUNNING THE MODULES---------------------------------------------------------------------------------
+void loadData() {
+    FILE *fp = fopen("parkingdata.txt", "r");
+    if (fp == NULL) return;
+    while (fscanf(fp, "%s %s %s", vehicles[filledSlots].number, vehicles[filledSlots].type, vehicles[filledSlots].entryTime) != EOF) {
+        filledSlots++;
+    }
+    fclose(fp);
+}
+
+int main() {
+    printf("\n=================WELCOME TO PARKING-LOT-MANAGEMENT SYSTEM===========================\n ");
+    loadData();  // load old records if any
+    menu();              // start the main program
+    saveDataToFile();    // save before exit
+    return 0;
+}
