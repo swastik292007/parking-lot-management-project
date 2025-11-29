@@ -201,7 +201,6 @@ void saveDataToFile() {
     fclose(fp);
 }
 
-//---------------------------------------------RUNNING THE MODULES---------------------------------------------------------------------------------
 void loadData() {
     FILE *fp = fopen("parkingdata.txt", "r");
     if (fp == NULL) return;
@@ -211,6 +210,7 @@ void loadData() {
     fclose(fp);
 }
 
+//---------------------------------------------RUNNING THE MODULES---------------------------------------------------------------------------------
 int main() {
     printf("\n=================WELCOME TO PARKING-LOT-MANAGEMENT SYSTEM===========================\n ");
     loadData();  // load old records if any
