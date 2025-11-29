@@ -150,10 +150,10 @@ void DisplayVehicles() {
     printf("\n|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|\n");
    
     for (int i=0; i<filledSlots; i++) {
-        printf("  %s\t%s\t\t%s\n",vehicles[i].number,vehicles[i].type,vehicles[i].entryTime);
+        printf("  %s\t\t%s\t\t%s\n",vehicles[i].number,vehicles[i].type,vehicles[i].entryTime);
     }
 
-    printf("\n|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|4\n");
+    printf("\n|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|\n");
 }
 
 //-----------------------------------PARKING LOT STATUS--------------------------------------------------
